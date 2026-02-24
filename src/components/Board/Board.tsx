@@ -21,18 +21,23 @@ export const Board: React.FC = () => {
     const handleDragEnd = (event: DragEndEvent) => {
         setActiveSession(null);
         const { active, over } = event;
-        if (!over) return; // Dropped outside
+        if (!over) return;
 
         const sessionId = active.id as string;
+        const draggedSession = state.sessions.find(s => s.id === sessionId);
 
-        // Dropped into unassigned pool
         if (over.id === 'unassigned-pool') {
             dispatch({ type: 'MOVE_SESSION', payload: { sessionId, day: undefined, period: undefined } });
             return;
         }
 
-        // Dropped into a cell
-        const { day, period } = over.data.current as { day: DayOfWeek; period: Period };
+        const { day, period, classGroupId } = over.data.current as { day: DayOfWeek; period: Period, classGroupId: string };
+
+        // Safety net: only allow dropping into the correct class board
+        if (draggedSession && draggedSession.classGroupId !== classGroupId) {
+            return; // Reject drop
+        }
+
         dispatch({ type: 'MOVE_SESSION', payload: { sessionId, day, period } });
     };
 
@@ -40,31 +45,37 @@ export const Board: React.FC = () => {
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
             <div className="flex flex-col lg:flex-row gap-6 p-6 min-h-screen bg-[#141414] text-stone-200 font-sans">
 
-                {/* Main Calendar Board */}
-                <main className="flex-1 overflow-x-auto">
-                    <section className="min-w-[800px] border border-stone-800 rounded-xl overflow-hidden shadow-2xl">
-                        <div className="grid grid-cols-6 bg-stone-900 border-b border-stone-800">
-                            <div className="p-4 font-bold text-center text-stone-400 flex items-center justify-center">時限 / 曜日</div>
-                            {DAYS.map(day => (
-                                <div key={day} className="p-4 font-bold text-center border-l border-stone-800 text-stone-300">
-                                    {day}曜
-                                </div>
-                            ))}
-                        </div>
+                {/* Main Calendar Boards (Multi-Class View) */}
+                <main className="flex-1 overflow-x-auto flex flex-col gap-12">
+                    {state.settings.classes.map(classGroup => (
+                        <section key={classGroup} className="min-w-[800px] border border-stone-800 rounded-xl overflow-hidden shadow-2xl bg-stone-900/50">
+                            <header className="bg-stone-900 p-4 border-b border-stone-800 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-indigo-300">🏫 {classGroup} 時間割</h2>
+                            </header>
 
-                        {Array.from({ length: state.settings.maxPeriods }, (_, i) => i + 1).map(period => (
-                            <div key={period} className="grid grid-cols-6 border-b border-stone-800 last:border-0">
-                                <div className="p-4 font-bold text-center bg-stone-900 flex items-center justify-center text-stone-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
-                                    {period}限
-                                </div>
+                            <div className="grid grid-cols-6 bg-stone-900/80 border-b border-stone-800">
+                                <div className="p-4 font-bold text-center text-stone-400 flex items-center justify-center">時限 / 曜日</div>
                                 {DAYS.map(day => (
-                                    <div key={`${day}-${period}`} className="border-l border-stone-800 bg-[#1e1e1e] p-1">
-                                        <Cell day={day} period={period} />
+                                    <div key={day} className="p-4 font-bold text-center border-l border-stone-800 text-stone-300">
+                                        {day}曜
                                     </div>
                                 ))}
                             </div>
-                        ))}
-                    </section>
+
+                            {Array.from({ length: state.settings.maxPeriods }, (_, i) => i + 1).map(period => (
+                                <div key={period} className="grid grid-cols-6 border-b border-stone-800 last:border-0">
+                                    <div className="p-4 font-bold text-center bg-stone-900 flex items-center justify-center text-stone-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
+                                        {period}限
+                                    </div>
+                                    {DAYS.map(day => (
+                                        <div key={`${classGroup}-${day}-${period}`} className="border-l border-stone-800 bg-[#1e1e1e] p-1">
+                                            <Cell day={day} period={period} classGroupId={classGroup} />
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </section>
+                    ))}
                 </main>
 
                 {/* Sidebar */}

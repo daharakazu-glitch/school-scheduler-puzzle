@@ -18,16 +18,31 @@ export const UnassignedPool: React.FC = () => {
         ${isOver ? 'border-indigo-500 bg-stone-800 ring-2 ring-indigo-500/50' : 'border-stone-800'}
       `}
         >
-            <h2 className="text-lg font-bold mb-4 text-stone-200">未配置の授業</h2>
-            <div className="flex flex-col gap-3 min-h-[150px]">
+            <h2 className="text-lg font-bold mb-4 text-stone-200">🚀 未配置の授業プール</h2>
+            <div className="flex flex-col gap-6 min-h-[150px] overflow-y-auto max-h-[500px] pr-2">
                 {unassignedSessions.length === 0 && (
                     <div className="text-stone-500 text-sm text-center italic py-6">
-                        すべての授業が配置されています
+                        すべてのミッション（授業）が配置完了しました
                     </div>
                 )}
-                {unassignedSessions.map(session => (
-                    <SessionItem key={session.id} session={session} />
-                ))}
+
+                {state.settings.classes.map(classGroup => {
+                    const classSessions = unassignedSessions.filter(s => s.classGroupId === classGroup);
+                    if (classSessions.length === 0) return null;
+
+                    return (
+                        <div key={classGroup} className="flex flex-col gap-2">
+                            <h3 className="text-sm font-semibold text-stone-400 border-b border-stone-800 pb-1">
+                                🏫 {classGroup}
+                            </h3>
+                            <div className="flex flex-col gap-2">
+                                {classSessions.map(session => (
+                                    <SessionItem key={session.id} session={session} />
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </section>
     );
