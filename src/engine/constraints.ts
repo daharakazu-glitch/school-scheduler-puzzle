@@ -1,8 +1,9 @@
-import type { Instructor, Session, ScheduleError } from './types';
+import type { Instructor, Session, ScheduleError, SchoolSettings } from './types';
 
 export function validateSchedule(
     sessions: Session[],
-    instructors: Instructor[]
+    instructors: Instructor[],
+    settings: SchoolSettings
 ): ScheduleError[] {
     const errors: ScheduleError[] = [];
     const instructorMap = new Map(instructors.map(i => [i.id, i]));
@@ -16,10 +17,19 @@ export function validateSchedule(
     for (const session of sessions) {
         if (!session.assignedDay || !session.assignedPeriod) continue;
 
+        // 枠外配置エラー追加
+        if (session.assignedPeriod > settings.maxPeriods) {
+            errors.push({
+                sessionId: session.id,
+                message: `設定された最大時限（${settings.maxPeriods} 限）を超えて配置されています。`,
+                type: 'double_booking'
+            });
+        }
+
         // 1. 非常勤講師の勤務枠チェック
         const instructor = instructorMap.get(session.instructorId);
         if (instructor) {
-            if (!instructor.availableSlots[session.assignedDay][session.assignedPeriod]) {
+            if (!instructor.availableSlots[session.assignedDay]?.[session.assignedPeriod]) {
                 errors.push({
                     sessionId: session.id,
                     message: `${instructor.name}先生は${session.assignedDay}曜${session.assignedPeriod}限に出勤できません。`,
@@ -29,7 +39,7 @@ export function validateSchedule(
         }
 
         // ダブルブッキング構造準備
-        const timeKey = `${session.assignedDay}-${session.assignedPeriod}`;
+        const timeKey = `${session.assignedDay} -${session.assignedPeriod} `;
         if (!timeSlotMap.has(timeKey)) {
             timeSlotMap.set(timeKey, []);
         }
@@ -54,7 +64,7 @@ export function validateSchedule(
                 const instructor = instructorMap.get(session.instructorId);
                 errors.push({
                     sessionId: session.id,
-                    message: `${instructor?.name || '講師'}が同じ時間帯に重複して授業を持っています。`,
+                    message: `${instructor?.name || '講師'} が同じ時間帯に重複して授業を持っています。`,
                     type: 'double_booking'
                 });
             }

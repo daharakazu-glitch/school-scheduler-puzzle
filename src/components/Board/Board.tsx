@@ -7,7 +7,6 @@ import { UnassignedPool } from './UnassignedPool';
 import { SessionItem } from '../DraggableItem/SessionItem';
 
 const DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-const PERIODS: Period[] = [1, 2, 3, 4, 5, 6];
 
 export const Board: React.FC = () => {
     const { state, dispatch } = useScheduleContext();
@@ -43,13 +42,6 @@ export const Board: React.FC = () => {
 
                 {/* Main Calendar Board */}
                 <main className="flex-1 overflow-x-auto">
-                    <header className="mb-6">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-                            School Scheduler
-                        </h1>
-                        <p className="text-stone-400 mt-2">Space Brothers Mission Control - Hybrid Edition</p>
-                    </header>
-
                     <section className="min-w-[800px] border border-stone-800 rounded-xl overflow-hidden shadow-2xl">
                         <div className="grid grid-cols-6 bg-stone-900 border-b border-stone-800">
                             <div className="p-4 font-bold text-center text-stone-400 flex items-center justify-center">時限 / 曜日</div>
@@ -60,7 +52,7 @@ export const Board: React.FC = () => {
                             ))}
                         </div>
 
-                        {PERIODS.map(period => (
+                        {Array.from({ length: state.settings.maxPeriods }, (_, i) => i + 1).map(period => (
                             <div key={period} className="grid grid-cols-6 border-b border-stone-800 last:border-0">
                                 <div className="p-4 font-bold text-center bg-stone-900 flex items-center justify-center text-stone-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
                                     {period}限

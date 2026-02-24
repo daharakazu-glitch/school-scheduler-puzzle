@@ -1,4 +1,9 @@
-import type { Instructor, Session } from './types';
+import type { Instructor, Session, SchoolSettings } from './types';
+
+export const defaultSettings: SchoolSettings = {
+    maxPeriods: 6,
+    classes: ['1-A', '1-B'],
+};
 
 // 月〜金の全時限OKのテンプレート
 const ALL_AVAILABLE = {

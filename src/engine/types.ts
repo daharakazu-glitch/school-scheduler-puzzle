@@ -1,5 +1,10 @@
 export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri';
-export type Period = 1 | 2 | 3 | 4 | 5 | 6;
+export type Period = number; // Dynamic period numbers (e.g., 1 to maxPeriods)
+
+export interface SchoolSettings {
+    maxPeriods: number; // e.g., 6 or 8
+    classes: string[]; // e.g., ['1-A', '1-B', '2-A']
+}
 
 export interface Instructor {
     id: string;
