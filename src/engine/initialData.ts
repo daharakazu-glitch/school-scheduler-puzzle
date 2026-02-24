@@ -1,4 +1,4 @@
-import type { Instructor, Session, SchoolSettings } from './types';
+import type { Instructor, SchoolSettings } from './types';
 
 export const defaultSettings: SchoolSettings = {
     maxPeriods: 6,
@@ -24,17 +24,33 @@ const PART_TIME_AVAILABLE_1 = {
 };
 
 export const initialInstructors: Instructor[] = [
-    { id: 'inst_1', name: '佐藤木漏れ日(常勤)', isPartTime: false, availableSlots: ALL_AVAILABLE },
-    { id: 'inst_2', name: '田中スターダスト(常勤)', isPartTime: false, availableSlots: ALL_AVAILABLE },
-    { id: 'inst_3', name: '鈴木ムーンライト(非常勤)', isPartTime: true, availableSlots: PART_TIME_AVAILABLE_1 },
-];
-
-export const initialSessions: Session[] = [
-    { id: 'sess_1', subjectId: '国語', instructorId: 'inst_1', classGroupId: '1-A', isRequiredSync: false },
-    { id: 'sess_2', subjectId: '数学', instructorId: 'inst_2', classGroupId: '1-B', isRequiredSync: false },
-    // 習熟度別授業（必須同期）
-    { id: 'sess_3', subjectId: '英語α', instructorId: 'inst_1', classGroupId: '1-A', isRequiredSync: true, syncGroupId: 'eng_level_1' },
-    { id: 'sess_4', subjectId: '英語β', instructorId: 'inst_3', classGroupId: '1-B', isRequiredSync: true, syncGroupId: 'eng_level_1' },
-    // 他の授業
-    { id: 'sess_5', subjectId: '理科', instructorId: 'inst_3', classGroupId: '1-A', isRequiredSync: false },
+    {
+        id: 'inst_1',
+        name: '佐藤木漏れ日(常勤)',
+        isPartTime: false,
+        availableSlots: ALL_AVAILABLE,
+        assignments: [
+            { id: 'sess_1', subjectId: '国語', classGroupId: '1-A', isRequiredSync: false },
+            { id: 'sess_3', subjectId: '英語α', classGroupId: '1-A', isRequiredSync: true, syncGroupId: 'eng_level_1' }
+        ]
+    },
+    {
+        id: 'inst_2',
+        name: '田中スターダスト(常勤)',
+        isPartTime: false,
+        availableSlots: ALL_AVAILABLE,
+        assignments: [
+            { id: 'sess_2', subjectId: '数学', classGroupId: '1-B', isRequiredSync: false }
+        ]
+    },
+    {
+        id: 'inst_3',
+        name: '鈴木ムーンライト(非常勤)',
+        isPartTime: true,
+        availableSlots: PART_TIME_AVAILABLE_1,
+        assignments: [
+            { id: 'sess_4', subjectId: '英語β', classGroupId: '1-B', isRequiredSync: true, syncGroupId: 'eng_level_1' },
+            { id: 'sess_5', subjectId: '理科', classGroupId: '1-A', isRequiredSync: false }
+        ]
+    },
 ];

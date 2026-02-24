@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useScheduleContext } from '../../contexts/ScheduleContext';
-import type { Instructor, DayOfWeek } from '../../engine/types';
+import type { Instructor, DayOfWeek, InstructorAssignment } from '../../engine/types';
 
 const DAYS: { id: DayOfWeek; label: string }[] = [
     { id: 'Mon', label: '月' },
@@ -42,6 +42,42 @@ export const InstructorSettings: React.FC = () => {
 
     const updateInstructorName = (id: string, name: string) => {
         setInstructors(instructors.map(i => i.id === id ? { ...i, name } : i));
+    };
+
+    const handleAddAssignment = (instructorId: string) => {
+        setInstructors(instructors.map(i => {
+            if (i.id === instructorId) {
+                const newAssignment: InstructorAssignment = {
+                    id: `assign-${Date.now()}`,
+                    subjectId: '新しい授業',
+                    classGroupId: state.settings.classes[0] || '1-A',
+                    isRequiredSync: false
+                };
+                return { ...i, assignments: [...(i.assignments || []), newAssignment] };
+            }
+            return i;
+        }));
+    };
+
+    const handleRemoveAssignment = (instructorId: string, assignmentId: string) => {
+        setInstructors(instructors.map(i => {
+            if (i.id === instructorId) {
+                return { ...i, assignments: (i.assignments || []).filter(a => a.id !== assignmentId) };
+            }
+            return i;
+        }));
+    };
+
+    const updateAssignment = (instructorId: string, assignmentId: string, field: keyof InstructorAssignment, value: any) => {
+        setInstructors(instructors.map(i => {
+            if (i.id === instructorId) {
+                return {
+                    ...i,
+                    assignments: (i.assignments || []).map(a => a.id === assignmentId ? { ...a, [field]: value } : a)
+                };
+            }
+            return i;
+        }));
     };
 
     const toggleAvailability = (instructorId: string, day: DayOfWeek, period: number) => {
@@ -144,6 +180,77 @@ export const InstructorSettings: React.FC = () => {
                             </table>
                             <p className="text-xs text-stone-500 mt-2">※ チェックが入っているコマが出勤可能（授業可能）な時間です。</p>
                         </div>
+
+                        {/* Assignments Section */}
+                        <div className="mt-8 pt-6 border-t border-stone-800">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-sm font-semibold text-indigo-300">📚 担当授業リスト</h3>
+                                <button
+                                    onClick={() => handleAddAssignment(instructor.id)}
+                                    className="px-3 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded text-xs transition-colors"
+                                >
+                                    + 授業を追加
+                                </button>
+                            </div>
+
+                            <div className="space-y-3">
+                                {(!instructor.assignments || instructor.assignments.length === 0) && (
+                                    <p className="text-xs text-stone-500 italic">登録されている担当授業はありません</p>
+                                )}
+                                {(instructor.assignments || []).map(assignment => (
+                                    <div key={assignment.id} className="flex flex-wrap items-center gap-3 bg-stone-900 border border-stone-700 rounded p-3">
+                                        <div className="flex-1 min-w-[120px]">
+                                            <input
+                                                type="text"
+                                                value={assignment.subjectId}
+                                                onChange={(e) => updateAssignment(instructor.id, assignment.id, 'subjectId', e.target.value)}
+                                                placeholder="科目名"
+                                                className="w-full bg-[#1a1a1a] border border-stone-700 rounded px-2 py-1 text-stone-200 focus:ring-1 focus:ring-indigo-500 outline-none text-sm"
+                                            />
+                                        </div>
+                                        <div className="w-32">
+                                            <select
+                                                value={assignment.classGroupId}
+                                                onChange={(e) => updateAssignment(instructor.id, assignment.id, 'classGroupId', e.target.value)}
+                                                className="w-full bg-[#1a1a1a] border border-stone-700 rounded px-2 py-1 text-stone-200 focus:ring-1 focus:ring-indigo-500 outline-none text-sm"
+                                            >
+                                                {state.settings.classes.map(c => <option key={c} value={c}>{c}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <label className="flex items-center gap-2 cursor-pointer text-xs text-stone-300">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={assignment.isRequiredSync || false}
+                                                    onChange={(e) => updateAssignment(instructor.id, assignment.id, 'isRequiredSync', e.target.checked)}
+                                                    className="w-3 h-3 text-indigo-600 bg-stone-900 border-stone-700 rounded"
+                                                />
+                                                並行授業
+                                            </label>
+                                        </div>
+                                        {assignment.isRequiredSync && (
+                                            <div className="w-28">
+                                                <input
+                                                    type="text"
+                                                    value={assignment.syncGroupId || ''}
+                                                    onChange={(e) => updateAssignment(instructor.id, assignment.id, 'syncGroupId', e.target.value)}
+                                                    placeholder="グループID"
+                                                    className="w-full bg-[#1a1a1a] border border-stone-700 rounded px-2 py-1 text-stone-200 focus:ring-1 focus:ring-indigo-500 outline-none text-xs"
+                                                />
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => handleRemoveAssignment(instructor.id, assignment.id)}
+                                            className="text-stone-500 hover:text-red-400 text-xs px-2"
+                                            title="削除"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                     </div>
                 ))}
 

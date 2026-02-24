@@ -6,6 +6,14 @@ export interface SchoolSettings {
     classes: string[]; // e.g., ['1-A', '1-B', '2-A']
 }
 
+export interface InstructorAssignment {
+    id: string; // Unique ID for the assignment rule
+    subjectId: string; // e.g., '国語', '数学'
+    classGroupId: string; // e.g., '1-A', 'B組'
+    isRequiredSync?: boolean;
+    syncGroupId?: string;
+}
+
 export interface Instructor {
     id: string;
     name: string;
@@ -15,6 +23,10 @@ export interface Instructor {
      * 例: availableSlots['Mon'][1] -> 月曜1限は可能か？
      */
     availableSlots: Record<DayOfWeek, Record<Period, boolean>>;
+    /**
+     * 担当する授業（クラスと科目のペア）のリスト
+     */
+    assignments?: InstructorAssignment[];
 }
 
 export interface Session {

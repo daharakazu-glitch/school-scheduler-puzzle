@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useScheduleContext } from '../../contexts/ScheduleContext';
 import { InstructorSettings } from './InstructorSettings';
-import { SessionSettings } from './SessionSettings';
 
 export const SettingsPanel: React.FC = () => {
     const { state, dispatch } = useScheduleContext();
@@ -67,7 +66,6 @@ export const SettingsPanel: React.FC = () => {
             </div>
 
             <InstructorSettings />
-            <SessionSettings />
         </div>
     );
 };
